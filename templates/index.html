@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Domain Delay</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.16/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+</head>
+<body>
+<div class="flex flex-col items-center justify-center min-h-screen bg-gray-200 space-y-6">
+        <form id="domain-form" class="space-y-3">
+            <label for="domain" class="font-medium text-gray-700">Domain:</label>
+            <input type="text" id="domain" name="domain" class="border border-gray-300 p-2 w-60">
+            <div id="buttons" class="flex space-x-2">
+                <input type="submit" value="Submit" class="bg-blue-500 text-white p-2">
+                <button id="stop-btn" type="button" class="bg-red-500 text-white p-2">Stop</button>
+            </div>
+        </form>
+        <p id="delay" class="text-lg text-gray-700"></p>
+        <div id="history" class="bg-white border border-gray-300 p-4 w-80 h-48 overflow-auto"></div>
+</div>
+
+<script>
+        $(document).ready(function () {
+            var intervalId;
+            $("#domain-form").on("submit", function (e) {
+                e.preventDefault();
+                if(intervalId){
+                    clearInterval(intervalId);
+                }
+                var domain = $("#domain").val();
+                intervalId = setInterval(function () {
+                    $.post("/get_delay", { domain: domain }, function(data) {
+                        var delay = parseFloat(data.delay).toFixed(2);
+                        var historyItem = $("<p>").text("Domain: " + domain + ", Delay: " + delay + " seconds - " + data.date);
+                        $("#history").prepend(historyItem);
+                    });
+                }, 2000);
+            });
+
+
+            $("#stop-btn").on("click", function (e) {
+                e.preventDefault();
+                clearInterval(intervalId);
+            });
+        });
+    </script>
+</body>
+</html>
